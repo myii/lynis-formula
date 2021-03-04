@@ -26,9 +26,16 @@ lynis/package/pkgrepo/epel:
 {%- endif %}
 
 lynis/package/install:
+  {%- if grains.os_family == 'Gentoo' and lynis | traverse('portage_config_flags:accept_keywords', []) %}
+  portage_config.flags:
+    - name: {{ lynis.package }}
+    - accept_keywords: {{ lynis.portage_config_flags.accept_keywords }}
+    - require_in:
+      - pkg: lynis/package/install
+  {%- endif %}
   pkg.installed:
     - pkgs:
-      - lynis
+      - {{ lynis.package }}
       {% if lynis.install_plugins %}
       - lynis-plugins
       {% endif %}
